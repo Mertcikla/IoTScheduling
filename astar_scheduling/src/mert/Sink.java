@@ -1,6 +1,6 @@
 package mert;
 
-public class Sink {
+public class Sink extends Sensor {
 	double xCoord;
 	double yCoord;
 	int depth;	

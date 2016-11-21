@@ -1,16 +1,11 @@
 package mert;
-import java.util.ArrayList;
-import java.util.List;
+import org.jgrapht.GraphPath;
+import org.jgrapht.alg.AStarShortestPath;
+import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
+import org.jgrapht.graph.DefaultWeightedEdge;
+import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 
 public class Pathfinder {
 
-	List<Sensor> path;
-	List<Sensor> graph;
 
-	Pathfinder(){
-		path = new ArrayList<Sensor>();
-		graph = new ArrayList<Sensor>();
-
-	}
-	
 }

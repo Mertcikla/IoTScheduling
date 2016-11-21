@@ -26,7 +26,7 @@ import org.jgrapht.demo.JGraphAdapterDemo;
 import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultWeightedEdge;
 
-import com.mxgraph.layout.mxCircleLayout;
+import com.mxgraph.layout.mxCompactTreeLayout;
 import com.mxgraph.swing.mxGraphComponent;
 
 /**
@@ -77,7 +77,9 @@ public class JGraphXAdapterDemo
         resize(DEFAULT_SIZE);
 
         // positioning via jgraphx layouts
-        mxCircleLayout layout = new mxCircleLayout(jgxAdapter);
+        mxCompactTreeLayout layout = new mxCompactTreeLayout(jgxAdapter);
+        layout.setNodeDistance(100);
+        layout.setEdgeRouting(true);
         layout.execute(jgxAdapter.getDefaultParent());
 
         // that's all there is to it!...
