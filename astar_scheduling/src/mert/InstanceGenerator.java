@@ -1,9 +1,14 @@
 package mert;
 
+
+import org.jgrapht.UndirectedGraph;
+import org.jgrapht.graph.DefaultEdge;
+import org.jgrapht.graph.SimpleGraph;
+
+
 public class InstanceGenerator {
 
-	Graph generate(int N){
-		Graph g = new Graph();
-		return g;
-	}
+	UndirectedGraph<String, DefaultEdge> g =
+            new SimpleGraph<String, DefaultEdge>(DefaultEdge.class);
+
 }
