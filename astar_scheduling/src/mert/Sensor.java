@@ -4,9 +4,15 @@ import java.util.List;
 
 public class Sensor {
 	float currentBattery;
-	int xCoord;
-	int yCoord;
-	int depth;	
+	double xCoord;
+	double yCoord;
+	double range;
+	int depth;
+	int id;
 	List<Sensor> nodesInRange;
+	
+	Sensor(){
+		currentBattery=100;
+	}
 	
 }
