@@ -41,7 +41,7 @@ public class JGraphXAdapterDemo
     private static final long serialVersionUID = 2202072534703043194L;
     private static final Dimension DEFAULT_SIZE = new Dimension(530, 320);
 	static InstanceGenerator instance;
-    private JGraphXAdapter<Sensor, DefaultWeightedEdge> jgxAdapter;
+ 
 
     /**
      * An alternative starting point for this demo, to also allow running this applet as an
@@ -49,41 +49,11 @@ public class JGraphXAdapterDemo
      *
      * @param args ignored.
      */
-    public static void main(String[] args)
-    {
-        JGraphAdapterDemo applet = new JGraphAdapterDemo();
-        applet.init();
-
-        JFrame frame = new JFrame();
-        frame.getContentPane().add(applet);
-        frame.setTitle("JGraphT Adapter to JGraph Demo");
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        frame.pack();
-        frame.setVisible(true);
-    }
 
     /**
      * {@inheritDoc}
      */
-    public void init()
-    {
-        // create a JGraphT graph
-    	instance= new InstanceGenerator();
 
-        // create a visualization using JGraph, via an adapter
-        jgxAdapter = new JGraphXAdapter<>(instance.g);
-
-        getContentPane().add(new mxGraphComponent(jgxAdapter));
-        resize(DEFAULT_SIZE);
-
-        // positioning via jgraphx layouts
-        mxCompactTreeLayout layout = new mxCompactTreeLayout(jgxAdapter);
-        layout.setNodeDistance(100);
-        layout.setEdgeRouting(true);
-        layout.execute(jgxAdapter.getDefaultParent());
-
-        // that's all there is to it!...
-    }
 }
 
 // End JGraphXAdapterDemo.java

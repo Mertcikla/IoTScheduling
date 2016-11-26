@@ -14,7 +14,7 @@ public class Sensor implements Comparable<Sensor> {
 	
 	Sensor(){
 		isActive=false;
-		currentBattery=100;
+		currentBattery=1;
 	}
 	public String toString(){
 		return "id: "+Integer.toString(id)+" depth: "+Integer.toString(depth);

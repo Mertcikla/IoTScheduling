@@ -7,5 +7,4 @@ public class Sink extends Sensor {
 	int k;
 	int id;
 	Sink next;
-	Graph g;
 }
