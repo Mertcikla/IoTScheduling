@@ -18,19 +18,19 @@ public class InstanceGenerator extends JFrame {
 
 	ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> g;
 
-	double fieldLength = 100;
-	static double fieldWidth = 5;
-	static double sensorRange = 60;
-	static int m = 100; // Number of sensors
+	double fieldLength = 1000000;
+	static double fieldWidth = 50;
+	static double sensorRange = 500; // 802.11ay has max range 1000
+	static int m = 1000000; // Number of sensors
 	static int k = 5; // Number of paths
-	static int totalCycle = 200;
+	static int totalCycle = 5;
 	static int retry = 3; // number of retries to find a path
 	static int avgConsumption = 10;
 	Sensor sourceSink;
 	Sensor destSink;
 
 	private static final long serialVersionUID = 2202072534703043194L;
-	private static final Dimension DEFAULT_SIZE = new Dimension(530, 320);
+	private static final Dimension DEFAULT_SIZE = new Dimension(830, 620);
 	private JGraphXAdapter<Sensor, DefaultWeightedEdge> graphAdapter;
 
 	public InstanceGenerator() {
@@ -56,38 +56,25 @@ public class InstanceGenerator extends JFrame {
 		generateSensors();
 		cycle();
 
-		/*
-		 * JFrame frame = new JFrame("demo"); graphAdapter = new
-		 * JGraphXAdapter<Sensor, DefaultWeightedEdge>(this.g0);
-		 * frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-		 * 
-		 * mxGraphLayout layout = new mxOrthogonalLayout(graphAdapter);
-		 * mxPointPair pointPair = new mxPointPair();
-		 * layout.setVertexLocation(sourceSink,fieldLength,fieldWidth);
-		 * layout.execute(graphAdapter.getDefaultParent());
-		 * 
-		 * frame.add(new mxGraphComponent(graphAdapter));
-		 * 
-		 * frame.pack(); frame.setLocationByPlatform(true);
-		 * frame.setVisible(true);
-		 */
-		System.out.println("frame set");
+		// JFrame frame = new JFrame("demo"); graphAdapter = new
+		// JGraphXAdapter<Sensor, DefaultWeightedEdge>(g);
+		// frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		//
+		// mxCompactTreeLayout layout = new mxCompactTreeLayout(graphAdapter);
+		// layout.setVertexLocation(sourceSink,fieldLength,fieldWidth);
+		// layout.execute(graphAdapter.getDefaultParent());
+		//
+		// frame.add(new mxGraphComponent(graphAdapter));
+		//
+		// frame.pack(); frame.setLocationByPlatform(true);
+		// frame.setVisible(true);
+		//
+		// System.out.println("frame set");
 
 	}
 
 	private void cycle() {
-		
-		Iterator<Sensor> vertexItr = g.vertexSet().iterator();
-		while(vertexItr.hasNext()){
-			Sensor nextS = vertexItr.next();
-			if(nextS.currentBattery>0)
-				nextS.isActive=false;
-		}
-		Iterator<DefaultWeightedEdge> edgeItr = g.edgeSet().iterator();
-		while(edgeItr.hasNext()){
-			DefaultWeightedEdge nextE = edgeItr.next();
-//			g.setEdgeWeight(nextE,g.getEdgeTarget(nextE).currentBattery);
-		}
+
 		for (int c = 0; c < totalCycle; c++) {
 			System.out.println("%--------------%  CYCLE " + c + "  %--------------%");
 			for (int i = 0; i < k; i++) {
@@ -101,10 +88,10 @@ public class InstanceGenerator extends JFrame {
 						System.out.println("cant find path k: " + i + " at cycle: " + c + " retry: " + r + "/" + retry);
 						Sensor[] resultState = this.g.vertexSet().toArray(new Sensor[m + 2]);
 						for (int h = 0; h < m + 1; h++) {
-					//		System.out.print("id: " + h + " ");
-						//	System.out.print("current battery: ");
-							//System.out.print(resultState[h].currentBattery);
-							//System.out.println();
+							// System.out.print("id: " + h + " ");
+							// System.out.print("current battery: ");
+							// System.out.print(resultState[h].currentBattery);
+							// System.out.println();
 						}
 						return;
 					} else if (path != null)
@@ -112,28 +99,40 @@ public class InstanceGenerator extends JFrame {
 				}
 
 				List<Sensor> l = path.getVertexList();
+				List<DefaultWeightedEdge> edgeList = path.getEdgeList();
 				Sensor[] gl = g.vertexSet().toArray(new Sensor[m]);
-				l.remove(l.size() - 1);
-				l.remove(0);
-				int pI = l.size() - 1;
-				while (!l.isEmpty()) {
-					Sensor s = gl[l.get(pI).id];
-					double energyCost = ((l.get(pI).xCoord - s.xCoord) * (l.get(pI).xCoord - s.xCoord))
+
+				int pI = l.size() - 2;
+				while (l.size() != 2) {
+					Sensor s = gl[l.get(pI).id + 1];
+					double energyCost = ((l.get(pI - 1).xCoord - s.xCoord) * (l.get(pI - 1).xCoord - s.xCoord))
 							/ (fieldLength * fieldLength);
 					s.currentBattery -= energyCost;
 					if (s.currentBattery < 0)
 						s.currentBattery = 0;
-					System.out.print(s.id +"("+s.currentBattery+") -> ");
+					System.out.print(s.id + "(" + s.currentBattery + ") -> ");
 					s.isActive = true;
-					gl[l.get(pI).id] = s;
+
+					gl[l.get(pI).id + 1] = s;
 					l.remove(pI);
 					pI--;
 
 				}
 				System.out.println();
 			}
-
+			Iterator<Sensor> vertexItr = g.vertexSet().iterator();
+			while (vertexItr.hasNext()) {
+				Sensor nextS = vertexItr.next();
+				if (nextS.currentBattery > 0)
+					nextS.isActive = false;
+			}
+			// Iterator<DefaultWeightedEdge> edgeItr = g.edgeSet().iterator();
+			// while(edgeItr.hasNext()){
+			// DefaultWeightedEdge nextE = edgeItr.next();
+			// g.setEdgeWeight(nextE,g.getEdgeTarget(nextE).currentBattery);
+			// }
 		}
+
 	}
 
 	public void generateSensors() {

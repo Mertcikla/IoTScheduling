@@ -101,10 +101,10 @@ public class ModifiedAStar<V, E> {
 	        do {
 	            FibonacciHeapNode<V> currentNode = openList.removeMin();
 
-	          //  float successChance = ((Sensor) currentNode.getData()).currentBattery;
-	        //    BinomialDistribution binomDist = new BinomialDistribution(10,successChance);
+	            float successChance = ((Sensor) currentNode.getData()).currentBattery;
+	            BinomialDistribution binomDist = new BinomialDistribution(10,successChance);
 	            // Check whether we reached the target vertex
-	            if (currentNode.getData().equals(targetVertex)) {
+	            if (currentNode.getData().equals(targetVertex) && ((Sensor)currentNode.getData()).isActive==false && ((Sensor)currentNode.getData()).currentBattery>0 && binomDist.sample()>5) {
 	                // Build the path
 	                return this.buildGraphPath(sourceVertex, targetVertex, currentNode.getKey());
 	            }
@@ -119,10 +119,11 @@ public class ModifiedAStar<V, E> {
 	        return null;
 	    }
 
-	    private void expandNode(FibonacciHeapNode<V> currentNode, V endVertex)
+	    private void expandNode(FibonacciHeapNode<V> currentNode, V endVertex )
 	    {
 	        numberOfExpandedNodes++;
-
+	        float successChance;
+	        BinomialDistribution binomDist;
 	        Set<E> outgoingEdges = null;
 	        if (graph instanceof UndirectedGraph) {
 	            outgoingEdges = graph.edgesOf(currentNode.getData());
@@ -132,7 +133,9 @@ public class ModifiedAStar<V, E> {
 
 	        for (E edge : outgoingEdges) {
 	            V successor = Graphs.getOppositeVertex(graph, edge, currentNode.getData());
-	            if ((successor == currentNode.getData()) || closedList.contains(successor) || ((Sensor)successor).isActive==true || ((Sensor)successor).currentBattery<=0) { // Ignore
+	            successChance= ((Sensor) successor).currentBattery;
+	            binomDist = new BinomialDistribution(10,successChance);
+	            if ((successor == currentNode.getData()) || closedList.contains(successor) || ((Sensor)successor).isActive==true || ((Sensor)successor).currentBattery<=0  || binomDist.sample()<5) { // Ignore
 	                                                                                          // self-loops
 	                                                                                          // or
 	                                                                                          // nodes
