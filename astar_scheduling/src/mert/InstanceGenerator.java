@@ -2,8 +2,8 @@ package mert;
 
 import java.awt.Dimension;
 import java.util.Arrays;
+import java.util.Iterator;
 import java.util.List;
-import java.util.Set;
 
 import javax.swing.JFrame;
 import javax.swing.SwingUtilities;
@@ -14,22 +14,17 @@ import org.jgrapht.ext.JGraphXAdapter;
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.ListenableDirectedWeightedGraph;
 
-import com.mxgraph.layout.mxGraphLayout;
-import com.mxgraph.layout.orthogonal.mxOrthogonalLayout;
-import com.mxgraph.layout.orthogonal.model.mxPointPair;
-import com.mxgraph.swing.mxGraphComponent;
-
 public class InstanceGenerator extends JFrame {
 
 	ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> g;
-	ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> g0;
 
 	double fieldLength = 100;
 	static double fieldWidth = 5;
-	static double sensorRange = 30;
-	static int m = 300; // Number of sensors
-	static int k = 1; // Number of paths
+	static double sensorRange = 60;
+	static int m = 100; // Number of sensors
+	static int k = 5; // Number of paths
 	static int totalCycle = 200;
+	static int retry = 3; // number of retries to find a path
 	static int avgConsumption = 10;
 	Sensor sourceSink;
 	Sensor destSink;
@@ -39,10 +34,8 @@ public class InstanceGenerator extends JFrame {
 	private JGraphXAdapter<Sensor, DefaultWeightedEdge> graphAdapter;
 
 	public InstanceGenerator() {
-	
 
 		g = new ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge>(DefaultWeightedEdge.class);
-		g0 = new ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge>(DefaultWeightedEdge.class);
 
 		sourceSink = new Sensor();
 		destSink = new Sensor();
@@ -59,79 +52,88 @@ public class InstanceGenerator extends JFrame {
 		destSink.range = sensorRange;
 
 		System.out.println("generate");
-		
+
 		generateSensors();
 		cycle();
-		
-		
+
 		/*
-		JFrame frame = new JFrame("demo");
-		graphAdapter = new JGraphXAdapter<Sensor, DefaultWeightedEdge>(this.g0);
-        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-        
-        mxGraphLayout layout = new mxOrthogonalLayout(graphAdapter);
-        mxPointPair pointPair = new mxPointPair();
-        layout.setVertexLocation(sourceSink,fieldLength,fieldWidth);
-        layout.execute(graphAdapter.getDefaultParent());
-
-        frame.add(new mxGraphComponent(graphAdapter));
-
-        frame.pack();
-        frame.setLocationByPlatform(true);
-        frame.setVisible(true);
-        */
+		 * JFrame frame = new JFrame("demo"); graphAdapter = new
+		 * JGraphXAdapter<Sensor, DefaultWeightedEdge>(this.g0);
+		 * frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		 * 
+		 * mxGraphLayout layout = new mxOrthogonalLayout(graphAdapter);
+		 * mxPointPair pointPair = new mxPointPair();
+		 * layout.setVertexLocation(sourceSink,fieldLength,fieldWidth);
+		 * layout.execute(graphAdapter.getDefaultParent());
+		 * 
+		 * frame.add(new mxGraphComponent(graphAdapter));
+		 * 
+		 * frame.pack(); frame.setLocationByPlatform(true);
+		 * frame.setVisible(true);
+		 */
 		System.out.println("frame set");
-
-		
-		
 
 	}
 
 	private void cycle() {
+		
+		Iterator<Sensor> vertexItr = g.vertexSet().iterator();
+		while(vertexItr.hasNext()){
+			Sensor nextS = vertexItr.next();
+			if(nextS.currentBattery>0)
+				nextS.isActive=false;
+		}
+		Iterator<DefaultWeightedEdge> edgeItr = g.edgeSet().iterator();
+		while(edgeItr.hasNext()){
+			DefaultWeightedEdge nextE = edgeItr.next();
+//			g.setEdgeWeight(nextE,g.getEdgeTarget(nextE).currentBattery);
+		}
 		for (int c = 0; c < totalCycle; c++) {
-			System.out.println("%%%%%%%%%%%%%%%%%%%%  CYCLE "+c+"  %%%%%%%%%%%%%%%%%%%%");
-			this.g0 = this.g;
+			System.out.println("%--------------%  CYCLE " + c + "  %--------------%");
 			for (int i = 0; i < k; i++) {
-				GraphPath<Sensor, DefaultWeightedEdge> path = pathfinder(this.g0, this.sourceSink,
-						this.destSink);
-				if (path == null) {
-					System.out.println("cant find path k: "+i+" at cycle: "+c);
-					Sensor[] resultState = this.g.vertexSet().toArray(new Sensor[m+2]);
-					for (int h = 0; h < m+1; h++) {
-						System.out.print("id: "+h+" ");
-						System.out.print("current battery: ");
-						System.out.print(resultState[h].currentBattery);
-						System.out.println();
+				int r = retry;
+				GraphPath<Sensor, DefaultWeightedEdge> path = null;
+				while (r != 0) {
+					r--;
+					path = pathfinder(g, sourceSink, destSink);
+					if (path == null && r == 0) {
+
+						System.out.println("cant find path k: " + i + " at cycle: " + c + " retry: " + r + "/" + retry);
+						Sensor[] resultState = this.g.vertexSet().toArray(new Sensor[m + 2]);
+						for (int h = 0; h < m + 1; h++) {
+					//		System.out.print("id: " + h + " ");
+						//	System.out.print("current battery: ");
+							//System.out.print(resultState[h].currentBattery);
+							//System.out.println();
 						}
-					return;
+						return;
+					} else if (path != null)
+						break;
 				}
 
 				List<Sensor> l = path.getVertexList();
-				List<Sensor> removedList;
-				int pathItr = l.size();
-				while (pathItr != 1) {
-					pathItr--;
-					Sensor s = l.get(pathItr);
-					System.out.println(s.xCoord);
-					if (s.id != 0 && s.id != m + 2) {
-						System.out.println("old lvl: "+s.currentBattery);
-					    double energyCost=((l.get(pathItr+1).xCoord-s.xCoord)*(l.get(pathItr+1).xCoord-s.xCoord))/(fieldLength*fieldLength);
-						s.currentBattery-=energyCost;
-						System.out.println("new lvl: "+s.currentBattery);
-						this.g0.removeVertex(s);
-						if(s.currentBattery<=0){
-							System.out.println();
-							System.out.print(s.currentBattery);
-							System.out.print(" removed");
-							System.out.println();
-							
-						}
-					}
-				}
+				Sensor[] gl = g.vertexSet().toArray(new Sensor[m]);
+				l.remove(l.size() - 1);
+				l.remove(0);
+				int pI = l.size() - 1;
+				while (!l.isEmpty()) {
+					Sensor s = gl[l.get(pI).id];
+					double energyCost = ((l.get(pI).xCoord - s.xCoord) * (l.get(pI).xCoord - s.xCoord))
+							/ (fieldLength * fieldLength);
+					s.currentBattery -= energyCost;
+					if (s.currentBattery < 0)
+						s.currentBattery = 0;
+					System.out.print(s.id +"("+s.currentBattery+") -> ");
+					s.isActive = true;
+					gl[l.get(pI).id] = s;
+					l.remove(pI);
+					pI--;
 
+				}
+				System.out.println();
 			}
 
-		}		
+		}
 	}
 
 	public void generateSensors() {
@@ -176,9 +178,9 @@ public class InstanceGenerator extends JFrame {
 	}
 
 	public GraphPath<Sensor, DefaultWeightedEdge> pathfinder(
-			ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> g, Sensor source, Sensor destination) {
+			ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> gr, Sensor source, Sensor destination) {
 		DistanceHeuristic h = new DistanceHeuristic();
-		ModifiedAStar<Sensor, DefaultWeightedEdge> aStar = new ModifiedAStar<Sensor, DefaultWeightedEdge>(g);
+		ModifiedAStar<Sensor, DefaultWeightedEdge> aStar = new ModifiedAStar<Sensor, DefaultWeightedEdge>(gr);
 		return aStar.getShortestPath(source, destination, h);
 
 	}
@@ -187,18 +189,17 @@ public class InstanceGenerator extends JFrame {
 
 		public double getCostEstimate(Sensor s1, Sensor s2) {
 
-			return Math.abs(s1.xCoord - s2.xCoord);
+			return 0;
 		}
 
 	}
 
-
-	public static void main(String[] args) {SwingUtilities.invokeLater(new Runnable() {
-        public void run() {
-        	new InstanceGenerator();
-        }
-    });
-		
+	public static void main(String[] args) {
+		SwingUtilities.invokeLater(new Runnable() {
+			public void run() {
+				new InstanceGenerator();
+			}
+		});
 
 	}
 
@@ -206,7 +207,6 @@ public class InstanceGenerator extends JFrame {
 		// create a JGraphT graph
 
 		// create a visualization using JGraph, via an adapter
-
 
 		// that's all there is to it!...
 	}

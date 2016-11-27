@@ -98,10 +98,11 @@ public class ModifiedAStar<V, E> {
 	        FibonacciHeapNode<V> heapNode = new FibonacciHeapNode<>(sourceVertex);
 	        openList.insert(heapNode, 0.0);
 	        vertexToHeapNodeMap.put(sourceVertex, heapNode);
-
 	        do {
 	            FibonacciHeapNode<V> currentNode = openList.removeMin();
 
+	          //  float successChance = ((Sensor) currentNode.getData()).currentBattery;
+	        //    BinomialDistribution binomDist = new BinomialDistribution(10,successChance);
 	            // Check whether we reached the target vertex
 	            if (currentNode.getData().equals(targetVertex)) {
 	                // Build the path
@@ -113,6 +114,7 @@ public class ModifiedAStar<V, E> {
 	            closedList.add(currentNode.getData());
 	        } while (!openList.isEmpty());
 
+
 	        // No path exists from sourceVertex to TargetVertex
 	        return null;
 	    }
@@ -120,6 +122,7 @@ public class ModifiedAStar<V, E> {
 	    private void expandNode(FibonacciHeapNode<V> currentNode, V endVertex)
 	    {
 	        numberOfExpandedNodes++;
+
 	        Set<E> outgoingEdges = null;
 	        if (graph instanceof UndirectedGraph) {
 	            outgoingEdges = graph.edgesOf(currentNode.getData());
@@ -129,8 +132,15 @@ public class ModifiedAStar<V, E> {
 
 	        for (E edge : outgoingEdges) {
 	            V successor = Graphs.getOppositeVertex(graph, edge, currentNode.getData());
-	            BinomialDistribution binomDist = new BinomialDistribution(10,((Sensor) successor).currentBattery);
-	            if ((successor == currentNode.getData()) || closedList.contains(successor) || binomDist.sample()<5  ) {
+	            if ((successor == currentNode.getData()) || closedList.contains(successor) || ((Sensor)successor).isActive==true || ((Sensor)successor).currentBattery<=0) { // Ignore
+	                                                                                          // self-loops
+	                                                                                          // or
+	                                                                                          // nodes
+	                                                                                          // which
+	                                                                                          // have
+	                                                                                          // already
+	                                                                                          // been
+	                                                                                          // expanded
 	                continue;
 	            }
 
@@ -154,7 +164,6 @@ public class ModifiedAStar<V, E> {
 	                }
 	            }
 	        }
-	        
 	    }
 
 	    /**
