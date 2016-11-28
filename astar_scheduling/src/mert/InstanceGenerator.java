@@ -18,10 +18,10 @@ public class InstanceGenerator extends JFrame {
 
 	ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> g;
 
-	double fieldLength = 1000000;
+	double fieldLength = 100000;
 	static double fieldWidth = 50;
 	static double sensorRange = 500; // 802.11ay has max range 1000
-	static int m = 1000000; // Number of sensors
+	static int m = 10000; // Number of sensors
 	static int k = 5; // Number of paths
 	static int totalCycle = 5;
 	static int retry = 3; // number of retries to find a path
