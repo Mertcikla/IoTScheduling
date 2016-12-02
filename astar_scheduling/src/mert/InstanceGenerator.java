@@ -20,14 +20,15 @@ public class InstanceGenerator extends JFrame {
 
 	double fieldLength = 1000;
 	double fieldWidth = 5;
-	static double sensorRange = 100; // 802.11ay has max range 1000
+	static double sensorRange; // 802.11ay has max range 1000
 	
-	int m = 200; // Number of sensors
-	int k = 1; // Number of paths
-	int totalCycle = 1000;
+	int m ; // Number of sensors
+	int k; // Number of paths
+	int totalCycle;
 	int retry = 1; // number of retries to find a path
 	int firstFailCycle;
 	int firstFailK;
+	int algorithm;
 	double avgEnergyAtFirstFail;
 
 	Sensor sourceSink;
@@ -37,13 +38,16 @@ public class InstanceGenerator extends JFrame {
 	private static final Dimension DEFAULT_SIZE = new Dimension(830, 620);
 	private JGraphXAdapter<Sensor, DefaultWeightedEdge> graphAdapter;
 
-	public InstanceGenerator() {
+	public InstanceGenerator(int numberOfNodes,int numberOfPaths,int sR,int met, int cycles) {
 
 		g = new ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge>(DefaultWeightedEdge.class);
-
+		m=numberOfNodes;
+		k=numberOfPaths;
+		sensorRange=sR;
 		sourceSink = new Sensor();
 		destSink = new Sensor();
-
+		algorithm= met;
+		totalCycle=cycles;
 		sourceSink.id = 0;
 		sourceSink.depth = 0;
 		sourceSink.xCoord = 0;
@@ -78,7 +82,7 @@ public class InstanceGenerator extends JFrame {
 	private void cycle() {
 		double distance;
 		for (int c = 0; c <= totalCycle; c++) {
-		//	 System.out.println("%--------------% CYCLE " + (c+1) + " %--------------%");
+			 System.out.println("%--------------% CYCLE " + (c+1) + " %--------------%");
 			for (int i = 0; i < k; i++) {
 				int r = retry;
 				GraphPath<Sensor, DefaultWeightedEdge> path = null;
@@ -99,6 +103,8 @@ public class InstanceGenerator extends JFrame {
 						avgEnergyAtFirstFail = totalEnergy / m;
 						return;
 					} else if(c==totalCycle){
+
+						firstFailCycle = c;
 						 System.out.println("cycles completed with k: " + i + " cycle: " + c);
 							Sensor[] resultState = g.vertexSet().toArray(new Sensor[m]);
 							double totalEnergy = 0;
@@ -116,7 +122,7 @@ public class InstanceGenerator extends JFrame {
 
 				List<Sensor> l = path.getVertexList();
 				Sensor[] gl = g.vertexSet().toArray(new Sensor[m]);
-		    	//System.out.println("Path Length: "+path.getLength());
+		    	System.out.println("Path Length: "+path.getLength());
 				int pI = l.size() - 2;
 				while (l.size() != 2) {
 					Sensor s = gl[l.get(pI).id + 1];
@@ -200,9 +206,18 @@ public class InstanceGenerator extends JFrame {
 
 	public GraphPath<Sensor, DefaultWeightedEdge> pathfinder(
 			ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> gr, Sensor source, Sensor destination) {
+	
+		if(algorithm==0){
 		DistanceHeuristic h = new DistanceHeuristic();
 		ModifiedAStar<Sensor, DefaultWeightedEdge> aStar = new ModifiedAStar<Sensor, DefaultWeightedEdge>(gr);
 		return aStar.getShortestPath(source, destination, h);
+		}
+		else{
+			RandomPath rp = new RandomPath(gr, source);
+			return rp.findPath(destination);
+		}
+			
+			
 
 	}
 
