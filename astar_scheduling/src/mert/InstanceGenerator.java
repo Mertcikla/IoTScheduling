@@ -19,11 +19,11 @@ public class InstanceGenerator extends JFrame {
 
 	double fieldLength = 1000;
 	double fieldWidth = 5;
-	double sensorRange = 100; // 802.11ay has max range 1000
+	static double sensorRange = 100; // 802.11ay has max range 1000
 	int m = 200; // Number of sensors
 	int k = 1; // Number of paths
 	int totalCycle = 1000;
-	int retry = 3; // number of retries to find a path
+	int retry = 1; // number of retries to find a path
 	int avgConsumption = 10;
 	int firstFailCycle;
 	int fullBatterySensors;
@@ -78,7 +78,7 @@ public class InstanceGenerator extends JFrame {
 	private void cycle() {
 		double distance;
 		for (int c = 0; c <= totalCycle; c++) {
-			 System.out.println("%--------------% CYCLE " + (c+1) + " %--------------%");
+		//	 System.out.println("%--------------% CYCLE " + (c+1) + " %--------------%");
 			for (int i = 0; i < k; i++) {
 				int r = retry;
 				GraphPath<Sensor, DefaultWeightedEdge> path = null;
@@ -121,16 +121,16 @@ public class InstanceGenerator extends JFrame {
 
 				List<Sensor> l = path.getVertexList();
 				Sensor[] gl = g.vertexSet().toArray(new Sensor[m]);
-				 System.out.println("Path Length: "+path.getLength());
+		//		 System.out.println("Path Length: "+path.getLength());
 				int pI = l.size() - 2;
 				while (l.size() != 2) {
 					Sensor s = gl[l.get(pI).id + 1];
-					double energyCost = Math.abs((l.get(pI - 1).xCoord - s.xCoord) / (5*(fieldLength)));
+					double energyCost =0.02 * Math.abs((l.get(pI - 1).xCoord - s.xCoord) / (sensorRange));
 					s.currentBattery -= energyCost;
 					
 					if (s.currentBattery < 0)
 						s.currentBattery = 0;
-					 System.out.print(s.id + "(" + s.currentBattery + ") ->");
+				//	 System.out.print(s.id + "(" + s.currentBattery + ") ->");
 					s.isActive = true;
 
 					gl[l.get(pI).id + 1] = s;
@@ -138,13 +138,17 @@ public class InstanceGenerator extends JFrame {
 					pI--;
 
 				}
-				System.out.println();
+		//		System.out.println();
 			}
 			Iterator<Sensor> vertexItr = g.vertexSet().iterator();
 			while (vertexItr.hasNext()) {
 				Sensor nextS = vertexItr.next();
+				nextS.currentBattery-=0.0001;
+				
 				if (nextS.currentBattery > 0)
 					nextS.isActive = false;
+				else
+					nextS.currentBattery=0;
 			}
 			Sensor s1,s2;
 			
@@ -153,7 +157,6 @@ public class InstanceGenerator extends JFrame {
 				DefaultWeightedEdge nextE = edgeItr.next();
 				s1=g.getEdgeSource(nextE);
 				s2=g.getEdgeTarget(nextE);
-				distance = Math.abs(s1.xCoord - s2.xCoord);
 				double EdgeWeight = (1- s2.currentBattery);
 				g.setEdgeWeight(nextE, EdgeWeight);
 			}
@@ -215,7 +218,7 @@ public class InstanceGenerator extends JFrame {
 
 		public double getCostEstimate(Sensor s1, Sensor s2) {
 
-			return 0;
+			return 1-(Math.abs(s1.xCoord-s2.xCoord)/sensorRange);
 		}
 
 	}
