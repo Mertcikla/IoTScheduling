@@ -10,11 +10,12 @@ public class Scheduler {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				InstanceGenerator IG = null;
-				int repetition = 1;
+				int repetition = 2;
 				double avgFirstFailCycle = 0;
 				double avgEnergyRemaining = 0;
 				double avgFirstFailK = 0;
 				double avgFullBatterySensors = 0;
+				System.out.println("%%%%%%%%%%%%%%%% Results %%%%%%%%%%%%%%%%");
 				for (int i = 0; i < repetition; i++) {
 					IG = new InstanceGenerator();
 					avgFirstFailCycle += IG.firstFailCycle;
