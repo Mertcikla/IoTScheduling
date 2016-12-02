@@ -104,7 +104,7 @@ public class ModifiedAStar<V, E> {
 	            float successChance = ((Sensor) currentNode.getData()).currentBattery;
 	            BinomialDistribution binomDist = new BinomialDistribution(10,successChance);
 	            // Check whether we reached the target vertex
-	            if (currentNode.getData().equals(targetVertex) && ((Sensor)currentNode.getData()).isActive==false && ((Sensor)currentNode.getData()).currentBattery>0 && binomDist.sample()>5) {
+	            if (currentNode.getData().equals(targetVertex) && ((Sensor)currentNode.getData()).isActive==false && ((Sensor)currentNode.getData()).currentBattery>0) {
 	                // Build the path
 	                return this.buildGraphPath(sourceVertex, targetVertex, currentNode.getKey());
 	            }
@@ -135,7 +135,7 @@ public class ModifiedAStar<V, E> {
 	            V successor = Graphs.getOppositeVertex(graph, edge, currentNode.getData());
 	            successChance= ((Sensor) successor).currentBattery;
 	            binomDist = new BinomialDistribution(10,successChance);
-	            if ((successor == currentNode.getData()) || closedList.contains(successor) || ((Sensor)successor).isActive==true || ((Sensor)successor).currentBattery<=0  || binomDist.sample()<5) { // Ignore
+	            if ((successor == currentNode.getData()) || closedList.contains(successor) || ((Sensor)successor).isActive==true || ((Sensor)successor).currentBattery<=0 ) { // Ignore
 	                                                                                          // self-loops
 	                                                                                          // or
 	                                                                                          // nodes

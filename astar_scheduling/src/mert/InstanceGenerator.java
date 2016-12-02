@@ -6,7 +6,6 @@ import java.util.Iterator;
 import java.util.List;
 
 import javax.swing.JFrame;
-import javax.swing.SwingUtilities;
 
 import org.jgrapht.GraphPath;
 import org.jgrapht.alg.interfaces.AStarAdmissibleHeuristic;
@@ -18,14 +17,19 @@ public class InstanceGenerator extends JFrame {
 
 	ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> g;
 
-	double fieldLength = 100000;
-	static double fieldWidth = 50;
-	static double sensorRange = 500; // 802.11ay has max range 1000
-	static int m = 10000; // Number of sensors
-	static int k = 5; // Number of paths
-	static int totalCycle = 5;
-	static int retry = 3; // number of retries to find a path
-	static int avgConsumption = 10;
+	double fieldLength = 1000;
+	double fieldWidth = 5;
+	double sensorRange = 100; // 802.11ay has max range 1000
+	int m = 200; // Number of sensors
+	int k = 1; // Number of paths
+	int totalCycle = 1000;
+	int retry = 3; // number of retries to find a path
+	int avgConsumption = 10;
+	int firstFailCycle;
+	int fullBatterySensors;
+	int firstFailK;
+	double avgEnergyAtFirstFail;
+
 	Sensor sourceSink;
 	Sensor destSink;
 
@@ -51,8 +55,6 @@ public class InstanceGenerator extends JFrame {
 		destSink.yCoord = fieldWidth / 2;
 		destSink.range = sensorRange;
 
-		System.out.println("generate");
-
 		generateSensors();
 		cycle();
 
@@ -74,9 +76,9 @@ public class InstanceGenerator extends JFrame {
 	}
 
 	private void cycle() {
-
-		for (int c = 0; c < totalCycle; c++) {
-			System.out.println("%--------------%  CYCLE " + c + "  %--------------%");
+		double distance;
+		for (int c = 0; c <= totalCycle; c++) {
+			 System.out.println("%--------------% CYCLE " + (c+1) + " %--------------%");
 			for (int i = 0; i < k; i++) {
 				int r = retry;
 				GraphPath<Sensor, DefaultWeightedEdge> path = null;
@@ -84,33 +86,51 @@ public class InstanceGenerator extends JFrame {
 					r--;
 					path = pathfinder(g, sourceSink, destSink);
 					if (path == null && r == 0) {
+						firstFailK = i;
+						firstFailCycle = c;
 
-						System.out.println("cant find path k: " + i + " at cycle: " + c + " retry: " + r + "/" + retry);
-						Sensor[] resultState = this.g.vertexSet().toArray(new Sensor[m + 2]);
-						for (int h = 0; h < m + 1; h++) {
-							// System.out.print("id: " + h + " ");
-							// System.out.print("current battery: ");
-							// System.out.print(resultState[h].currentBattery);
-							// System.out.println();
+						 System.out.println("cant find path k: " + i + " at cycle: " + c + " retry: " + r + "/" + retry);
+						Sensor[] resultState = g.vertexSet().toArray(new Sensor[m]);
+						double totalEnergy = 0;
+						fullBatterySensors=0;
+						for (int h = 2; h <= m + 1; h++) {
+							totalEnergy += resultState[h].currentBattery;
+							if(resultState[h].currentBattery==1)
+								fullBatterySensors++;
 						}
+						
+						avgEnergyAtFirstFail = totalEnergy / m;
 						return;
-					} else if (path != null)
+					} else if(c==totalCycle){
+						 System.out.println("cycles completed with k: " + i + " cycle: " + c);
+							Sensor[] resultState = g.vertexSet().toArray(new Sensor[m]);
+							double totalEnergy = 0;
+							for (int h = 2; h <= m + 1; h++) {
+								totalEnergy += resultState[h].currentBattery;
+								if(resultState[h].currentBattery>=0.8)
+									fullBatterySensors++;
+							}
+							
+							avgEnergyAtFirstFail = totalEnergy / m;
+							return;
+						
+					}
+						else if (path != null)
 						break;
 				}
 
 				List<Sensor> l = path.getVertexList();
-				List<DefaultWeightedEdge> edgeList = path.getEdgeList();
 				Sensor[] gl = g.vertexSet().toArray(new Sensor[m]);
-
+				 System.out.println("Path Length: "+path.getLength());
 				int pI = l.size() - 2;
 				while (l.size() != 2) {
 					Sensor s = gl[l.get(pI).id + 1];
-					double energyCost = ((l.get(pI - 1).xCoord - s.xCoord) * (l.get(pI - 1).xCoord - s.xCoord))
-							/ (fieldLength * fieldLength);
+					double energyCost = Math.abs((l.get(pI - 1).xCoord - s.xCoord) / (5*(fieldLength)));
 					s.currentBattery -= energyCost;
+					
 					if (s.currentBattery < 0)
 						s.currentBattery = 0;
-					System.out.print(s.id + "(" + s.currentBattery + ") -> ");
+					 System.out.print(s.id + "(" + s.currentBattery + ") ->");
 					s.isActive = true;
 
 					gl[l.get(pI).id + 1] = s;
@@ -126,11 +146,17 @@ public class InstanceGenerator extends JFrame {
 				if (nextS.currentBattery > 0)
 					nextS.isActive = false;
 			}
-			// Iterator<DefaultWeightedEdge> edgeItr = g.edgeSet().iterator();
-			// while(edgeItr.hasNext()){
-			// DefaultWeightedEdge nextE = edgeItr.next();
-			// g.setEdgeWeight(nextE,g.getEdgeTarget(nextE).currentBattery);
-			// }
+			Sensor s1,s2;
+			
+			Iterator<DefaultWeightedEdge> edgeItr = g.edgeSet().iterator();
+			while (edgeItr.hasNext()) {
+				DefaultWeightedEdge nextE = edgeItr.next();
+				s1=g.getEdgeSource(nextE);
+				s2=g.getEdgeTarget(nextE);
+				distance = Math.abs(s1.xCoord - s2.xCoord);
+				double EdgeWeight = (1- s2.currentBattery);
+				g.setEdgeWeight(nextE, EdgeWeight);
+			}
 		}
 
 	}
@@ -166,7 +192,8 @@ public class InstanceGenerator extends JFrame {
 								+ (s1.yCoord - s2.yCoord) * (s1.yCoord - s2.yCoord));
 						if (distance <= sensorRange) {
 							edge = g.addEdge(s1, s2);
-							g.setEdgeWeight(edge, s2.currentBattery);
+							double EdgeWeight = (1- s2.currentBattery);
+							g.setEdgeWeight(edge, EdgeWeight);
 						}
 					}
 				}
@@ -190,15 +217,6 @@ public class InstanceGenerator extends JFrame {
 
 			return 0;
 		}
-
-	}
-
-	public static void main(String[] args) {
-		SwingUtilities.invokeLater(new Runnable() {
-			public void run() {
-				new InstanceGenerator();
-			}
-		});
 
 	}
 
