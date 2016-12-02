@@ -89,11 +89,11 @@ public class InstanceGenerator extends JFrame {
 				while (r != 0) {
 					r--;
 					path = pathfinder(g, sourceSink, destSink);
-					if (path == null && r == 0) {
+					if ((path == null || path.getVertexList().size()==2)&& r == 0) {
 						firstFailK = i;
 						firstFailCycle = c;
 
-						 System.out.println("cant find path k: " + i + " at cycle: " + c + " retry: " + r + "/" + retry);
+						System.out.println("cant find path k: " + i + " at cycle: " + c);
 						Sensor[] resultState = g.vertexSet().toArray(new Sensor[m]);
 						double totalEnergy = 0;
 						for (int h = 2; h <= m + 1; h++) {

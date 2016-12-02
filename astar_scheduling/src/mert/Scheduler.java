@@ -8,7 +8,7 @@ public class Scheduler {
 	static int m=300;
 	static int r=100;
 	static int cycles=2000;
-	static int repetition = 2;
+	static int repetition = 100;
 	static double avgFirstFailCycle = 0;
 	static double avgEnergyRemaining = 0;
 	static double avgFirstFailK = 0;

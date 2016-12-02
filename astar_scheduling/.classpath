@@ -6,13 +6,9 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry exported="true" kind="lib" path="src/jgrapht-ext-1.0.0-uber.jar" sourcepath="/Users/Mert/Downloads/mxgraph-master 2/java/src"/>
-	<classpathentry exported="true" kind="lib" path="src/mxgraph-all.jar" sourcepath="/Users/Mert/Downloads/mxgraph-master 2/java/src">
-		<attributes>
-			<attribute name="javadoc_location" value="file:/Users/Mert/Downloads/mxgraph-master%202/java/src/docs/"/>
-		</attributes>
-	</classpathentry>
-	<classpathentry exported="true" kind="lib" path="src/jgrapht-demo-1.0.0.jar"/>
-	<classpathentry exported="true" kind="lib" path="src/commons-math3-3.6.1.jar"/>
+	<classpathentry kind="lib" path="src/mert/commons-math3-3.6.1.jar"/>
+	<classpathentry kind="lib" path="src/mert/jgrapht-demo-1.0.0.jar"/>
+	<classpathentry kind="lib" path="src/mert/jgrapht-ext-1.0.0-uber.jar"/>
+	<classpathentry kind="lib" path="src/mert/mxgraph-all.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
