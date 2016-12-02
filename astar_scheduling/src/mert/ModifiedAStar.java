@@ -101,8 +101,6 @@ public class ModifiedAStar<V, E> {
 	        do {
 	            FibonacciHeapNode<V> currentNode = openList.removeMin();
 
-	            float successChance = ((Sensor) currentNode.getData()).currentBattery;
-	            BinomialDistribution binomDist = new BinomialDistribution(10,successChance);
 	            // Check whether we reached the target vertex
 	            if (currentNode.getData().equals(targetVertex) && ((Sensor)currentNode.getData()).isActive==false && ((Sensor)currentNode.getData()).currentBattery>0) {
 	                // Build the path
@@ -133,8 +131,6 @@ public class ModifiedAStar<V, E> {
 
 	        for (E edge : outgoingEdges) {
 	            V successor = Graphs.getOppositeVertex(graph, edge, currentNode.getData());
-	            successChance= ((Sensor) successor).currentBattery;
-	            binomDist = new BinomialDistribution(10,successChance);
 	            if ((successor == currentNode.getData()) || closedList.contains(successor) || ((Sensor)successor).isActive==true || ((Sensor)successor).currentBattery<=0 ) { // Ignore
 	                                                                                          // self-loops
 	                                                                                          // or

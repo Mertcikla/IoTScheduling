@@ -26,9 +26,7 @@ public class InstanceGenerator extends JFrame {
 	int k = 1; // Number of paths
 	int totalCycle = 1000;
 	int retry = 1; // number of retries to find a path
-	int avgConsumption = 10;
 	int firstFailCycle;
-	int fullBatterySensors;
 	int firstFailK;
 	double avgEnergyAtFirstFail;
 
@@ -94,11 +92,8 @@ public class InstanceGenerator extends JFrame {
 						 System.out.println("cant find path k: " + i + " at cycle: " + c + " retry: " + r + "/" + retry);
 						Sensor[] resultState = g.vertexSet().toArray(new Sensor[m]);
 						double totalEnergy = 0;
-						fullBatterySensors=0;
 						for (int h = 2; h <= m + 1; h++) {
 							totalEnergy += resultState[h].currentBattery;
-							if(resultState[h].currentBattery==1)
-								fullBatterySensors++;
 						}
 						
 						avgEnergyAtFirstFail = totalEnergy / m;
@@ -109,8 +104,6 @@ public class InstanceGenerator extends JFrame {
 							double totalEnergy = 0;
 							for (int h = 2; h <= m + 1; h++) {
 								totalEnergy += resultState[h].currentBattery;
-								if(resultState[h].currentBattery>=0.8)
-									fullBatterySensors++;
 							}
 							
 							avgEnergyAtFirstFail = totalEnergy / m;
@@ -123,22 +116,21 @@ public class InstanceGenerator extends JFrame {
 
 				List<Sensor> l = path.getVertexList();
 				Sensor[] gl = g.vertexSet().toArray(new Sensor[m]);
-			//	 System.out.println("Path Length: "+path.getLength());
+		    	//System.out.println("Path Length: "+path.getLength());
 				int pI = l.size() - 2;
-				NormalDistribution gauss;
 				while (l.size() != 2) {
 					Sensor s = gl[l.get(pI).id + 1];
-					double energyCost = 0.02;
+					double energyCost = 0.02 * ((Math.abs(s.xCoord-l.get(pI+1).xCoord)/sensorRange));
 					s.currentBattery -= energyCost;
-		//			 System.out.print(s.id + "(" + s.currentBattery + ") ->");
+			     	System.out.print(s.id + "(" + s.currentBattery + ") ->");
 					s.isActive = true;
 
 					gl[l.get(pI).id + 1] = s;
-					l.remove(pI);
+					l.remove(pI+1);
 					pI--;
 
 				}
-			//	System.out.println();
+				System.out.println();
 			}
 			Iterator<Sensor> vertexItr = g.vertexSet().iterator();
 			while (vertexItr.hasNext()) {

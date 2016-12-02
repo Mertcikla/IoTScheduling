@@ -10,30 +10,45 @@ public class Scheduler {
 		SwingUtilities.invokeLater(new Runnable() {
 			public void run() {
 				InstanceGenerator IG = null;
-				int repetition = 2;
+				int repetition = 50;
 				double avgFirstFailCycle = 0;
 				double avgEnergyRemaining = 0;
 				double avgFirstFailK = 0;
-				double avgFullBatterySensors = 0;
-				System.out.println("%%%%%%%%%%%%%%%% Results %%%%%%%%%%%%%%%%");
+				double minRemaining =10000;
+				double maxRemaining =0;
+				double minFailCycle = 1000;
+				double maxFailCycle =0 ;
 				for (int i = 0; i < repetition; i++) {
 					IG = new InstanceGenerator();
 					avgFirstFailCycle += IG.firstFailCycle;
 					avgEnergyRemaining += IG.avgEnergyAtFirstFail;
 					avgFirstFailK += IG.firstFailK;
-					avgFullBatterySensors += IG.fullBatterySensors;
 					System.out.println(IG.firstFailCycle);
 					System.out.println(IG.avgEnergyAtFirstFail);
 					System.out.println(IG.firstFailK);
-					System.out.println(IG.fullBatterySensors);
+					if(IG.firstFailCycle<minFailCycle)
+						minFailCycle=IG.firstFailCycle;
+					if(IG.firstFailCycle>maxFailCycle)
+						maxFailCycle=IG.firstFailCycle;
+					if(IG.avgEnergyAtFirstFail>maxRemaining)
+						maxRemaining=IG.avgEnergyAtFirstFail;
+					if(IG.avgEnergyAtFirstFail<minRemaining)
+						minRemaining=IG.avgEnergyAtFirstFail;
 
 				}
 				System.out.println("L=" + IG.fieldLength + " m=" + IG.m + " k=" + IG.k);
-				System.out.println(avgFirstFailCycle / repetition);
-				System.out.println(avgEnergyRemaining / repetition);
-				System.out.println(avgFirstFailK / repetition);
-				System.out.println(avgFullBatterySensors / repetition);
+				System.out.print(avgFirstFailCycle / repetition);
+				System.out.print(" | "+ minFailCycle);
+				System.out.print("/");
+				System.out.println(maxFailCycle);
 
+
+				System.out.print(avgEnergyRemaining / repetition);
+				System.out.print(" | "+ minRemaining);
+				System.out.print("/");
+				System.out.println(maxRemaining);
+
+				System.out.println(avgFirstFailK / repetition);
 			}
 		});
 
