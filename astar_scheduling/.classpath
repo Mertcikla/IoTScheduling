@@ -6,9 +6,9 @@
 		</attributes>
 	</classpathentry>
 	<classpathentry exported="true" kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.8"/>
-	<classpathentry kind="lib" path="src/mert/commons-math3-3.6.1.jar"/>
-	<classpathentry kind="lib" path="src/mert/jgrapht-demo-1.0.0.jar"/>
-	<classpathentry kind="lib" path="src/mert/jgrapht-ext-1.0.0-uber.jar"/>
-	<classpathentry kind="lib" path="src/mert/mxgraph-all.jar"/>
+	<classpathentry kind="lib" path="/Users/Mert/git/IoTScheduling/astar_scheduling/bin/mxgraph-all.jar"/>
+	<classpathentry kind="lib" path="/Users/Mert/git/IoTScheduling/astar_scheduling/bin/commons-math3-3.6.1.jar"/>
+	<classpathentry kind="lib" path="/Users/Mert/git/IoTScheduling/astar_scheduling/bin/jgrapht-demo-1.0.0.jar"/>
+	<classpathentry kind="lib" path="/Users/Mert/git/IoTScheduling/astar_scheduling/bin/jgrapht-ext-1.0.0-uber.jar"/>
 	<classpathentry kind="output" path="bin"/>
 </classpath>

@@ -20,7 +20,7 @@ import org.jgrapht.graph.GraphWalk;
 import org.jgrapht.util.FibonacciHeap;
 import org.jgrapht.util.FibonacciHeapNode;
 
-public class ModifiedAStar<V, E> {
+public class MinHopAStar<V, E> {
 
 	
 	    private final Graph<V, E>  graph;
@@ -50,7 +50,7 @@ public class ModifiedAStar<V, E> {
 	     * 
 	     * @param graph the input graph
 	     */
-	    public ModifiedAStar(Graph<V, E> graph)
+	    public MinHopAStar(Graph<V, E> graph)
 	    {
 	        if (graph == null) {
 	            throw new IllegalArgumentException("Graph cannot be null!");
@@ -142,7 +142,7 @@ public class ModifiedAStar<V, E> {
 	            }
 
 	            double gScore_current = gScoreMap.get(currentNode.getData());
-	            double tentativeGScore = gScore_current + graph.getEdgeWeight(edge);
+	            double tentativeGScore = gScore_current + 1;
 
 	            if (!vertexToHeapNodeMap.containsKey(successor)
 	                || (tentativeGScore < gScoreMap.get(successor)))

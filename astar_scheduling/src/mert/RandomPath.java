@@ -2,6 +2,8 @@ package mert;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
+import java.util.TreeSet;
 
 import org.jgrapht.graph.DefaultWeightedEdge;
 import org.jgrapht.graph.GraphWalk;
@@ -14,23 +16,39 @@ public class RandomPath {
 	ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> g;
 	List<Sensor> vertexList;
 
-	public RandomPath(ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> graph, Sensor start) {
-		this.g = graph;
-		itr = new RandomWalkIterator<Sensor, DefaultWeightedEdge>(g, start);
-		vertexList = new ArrayList<Sensor>();
-		vertexList.add(start);
+	public RandomPath(ListenableDirectedWeightedGraph<Sensor, DefaultWeightedEdge> g, Sensor start,Sensor destination) {
+		walk =null;
+		Sensor node;
+		DefaultWeightedEdge e;
+		List<Sensor> sensorList = new ArrayList<Sensor>();
+		Sensor target;
+		int index;
+		node=start;
+		sensorList.add(start);
+		List<DefaultWeightedEdge> edges= new ArrayList<DefaultWeightedEdge>( g.outgoingEdgesOf(node));
+
+	
+		while(!edges.isEmpty()){
+			index=(int)(Math.random()*(edges.size()-1));
+			e=edges.get(index);
+			target=g.getEdgeTarget(e);
+			if(target==destination){
+				sensorList.add(target);
+				walk=new GraphWalk<Sensor, DefaultWeightedEdge>(g,sensorList, 0);
+				return ;
+			}
+			else if(g.getEdgeWeight(e)>0 && target.isActive==false){
+				sensorList.add(target);
+				edges= new ArrayList<DefaultWeightedEdge>( g.outgoingEdgesOf(target));				
+			}
+			else
+				edges.remove(index);
+			
+		}
+				
+		
 	}
 
-	public GraphWalk<Sensor, DefaultWeightedEdge> findPath(Sensor end) {
-		while (itr.hasNext()) {
-			Sensor NextNode = (Sensor) itr.next();
-			if (NextNode.currentBattery > 0 && NextNode.isActive==false)
-				vertexList.add(NextNode);
-			if (NextNode.id == end.id) {
-				walk = new GraphWalk<Sensor, DefaultWeightedEdge>(this.g, vertexList, 0);
-				return walk;
-			}
-		}
-		return null;
-	}
+	
 }
+
